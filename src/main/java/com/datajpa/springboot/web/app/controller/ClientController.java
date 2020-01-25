@@ -1,5 +1,9 @@
 package com.datajpa.springboot.web.app.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.datajpa.springboot.web.app.model.entity.Client;
@@ -32,13 +37,25 @@ public class ClientController {
 	@Autowired
 	private IClientService clientService;
 
+	@GetMapping(value = "/view/{id}")
+	public String view(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
+		Client client = clientService.findOne(id);
+		if (client == null) {
+			flash.addFlashAttribute("error", "Client no exist");
+			return "redirect:/client/list";
+		}
+		model.addAttribute("client", client);
+		model.addAttribute("title", "Client detail: " + client.getName() + " " + client.getLastName());
+		return "view";
+	}
+
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public String list(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
 		Pageable pageRequest = PageRequest.of(page, 4);
 		Page<Client> clients = clientService.findAll(pageRequest);
 		PageRender<Client> pageRender = new PageRender<>("/client/list", clients);
 		model.addAttribute("title", "Client list");
-		//model.addAttribute("clients", clientService.findAll());
+		// model.addAttribute("clients", clientService.findAll());
 		model.addAttribute("clients", clients);
 		model.addAttribute("page", pageRender);
 		return "list";
@@ -53,11 +70,26 @@ public class ClientController {
 	}
 
 	@RequestMapping(value = "/form", method = RequestMethod.POST)
-	public String save(@Valid Client client, BindingResult bindingResult, Model model, RedirectAttributes flash,
-			SessionStatus status) {
+	public String save(@Valid Client client, BindingResult bindingResult, Model model,
+			@RequestParam("file") MultipartFile pic, RedirectAttributes flash, SessionStatus status) {
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("title", "Form Client");
 			return "form";
+		}
+
+		if (!pic.isEmpty()) {
+			Path path = Paths.get("src//main//resources//static//uploads");
+			String rootPath = path.toFile().getAbsolutePath();
+			try {
+				byte[] bytes = pic.getBytes();
+				Path completeRoute = Paths.get(rootPath + "//" + pic.getOriginalFilename());
+				Files.write(completeRoute, bytes);
+				flash.addFlashAttribute("info", "Upload successfully " + pic.getOriginalFilename());
+				client.setPic(pic.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		String messageFlash = (client.getId() != null) ? "Client edit success" : "Client save success";
@@ -74,11 +106,11 @@ public class ClientController {
 		if (id > 0) {
 			client = clientService.findOne(id);
 			if (client == null) {
-				flash.addFlashAttribute("danger", "Client ID not exist");
+				flash.addFlashAttribute("error", "Client ID not exist");
 				return "redirect:/client/list";
 			}
 		} else {
-			flash.addFlashAttribute("danger", "Client ID cannot be 0");
+			flash.addFlashAttribute("error", "Client ID cannot be 0");
 			return "redirect:/client/list";
 		}
 		model.addAttribute("client", client);

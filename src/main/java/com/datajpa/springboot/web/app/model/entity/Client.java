@@ -39,6 +39,15 @@ public class Client implements Serializable {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@NotNull
 	private Date createAt;
+	private String pic;
+
+	public String getPic() {
+		return pic;
+	}
+
+	public void setPic(String pic) {
+		this.pic = pic;
+	}
 
 	/*
 	 * @PrePersist public void prePersist() { createAt = new Date(); }
