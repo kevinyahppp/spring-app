@@ -8,14 +8,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.datajpa.springboot.web.app.model.dao.IBillDao;
 import com.datajpa.springboot.web.app.model.dao.IClientDao;
+import com.datajpa.springboot.web.app.model.dao.IProductDao;
+import com.datajpa.springboot.web.app.model.entity.Bill;
 import com.datajpa.springboot.web.app.model.entity.Client;
+import com.datajpa.springboot.web.app.model.entity.Product;
 
 @Service
 public class ClientServiceImpl implements IClientService {
 	
 	@Autowired
 	private IClientDao clientDao;
+	
+	@Autowired
+	private IProductDao productDao;
+	
+	@Autowired
+	private IBillDao billDao;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -50,5 +60,33 @@ public class ClientServiceImpl implements IClientService {
 	public Page<Client> findAll(Pageable pageable) {
 		// TODO Auto-generated method stub
 		return clientDao.findAll(pageable);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Product> findByName(String name) {
+		// TODO Auto-generated method stub
+		return productDao.findByNameLikeIgnoreCase("%"+name+"%");
+	}
+
+	@Override
+	@Transactional
+	public void saveBill(Bill bill) {
+		// TODO Auto-generated method stub
+		billDao.save(bill);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Product findProductById(Long id) {
+		// TODO Auto-generated method stub
+		return productDao.findById(id).orElse(null);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Bill findBillById(Long id) {
+		// TODO Auto-generated method stub
+		return billDao.findById(id).orElse(null);
 	}
 }

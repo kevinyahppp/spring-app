@@ -1,17 +1,19 @@
 package com.datajpa.springboot.web.app.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.MalformedURLException;
 import java.util.Map;
-
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.datajpa.springboot.web.app.model.entity.Client;
 import com.datajpa.springboot.web.app.model.service.IClientService;
+import com.datajpa.springboot.web.app.model.service.IUploadFileService;
 import com.datajpa.springboot.web.app.util.paginator.PageRender;
 
 @Controller
@@ -36,6 +39,26 @@ public class ClientController {
 
 	@Autowired
 	private IClientService clientService;
+	@Autowired
+	private IUploadFileService uploadFileService;
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	@GetMapping(value = "/uploads/{filename:.+}")
+	public ResponseEntity<Resource> viewPic(@PathVariable String filename) {
+
+		Resource resource = null;
+
+		try {
+			resource = uploadFileService.load(filename);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
+	}
 
 	@GetMapping(value = "/view/{id}")
 	public String view(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
@@ -78,18 +101,22 @@ public class ClientController {
 		}
 
 		if (!pic.isEmpty()) {
-			Path path = Paths.get("src//main//resources//static//uploads");
-			String rootPath = path.toFile().getAbsolutePath();
+			if (client.getId() != null && client.getId() > 0 && client.getPic() != null
+					&& client.getPic().length() > 0) {
+				uploadFileService.delete(client.getPic());
+			}
+
+			String uniqueFileName = null;
+
 			try {
-				byte[] bytes = pic.getBytes();
-				Path completeRoute = Paths.get(rootPath + "//" + pic.getOriginalFilename());
-				Files.write(completeRoute, bytes);
-				flash.addFlashAttribute("info", "Upload successfully " + pic.getOriginalFilename());
-				client.setPic(pic.getOriginalFilename());
+				uniqueFileName = uploadFileService.copy(pic);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			flash.addFlashAttribute("info", "Upload successfully " + uniqueFileName);
+			client.setPic(uniqueFileName);
 		}
 
 		String messageFlash = (client.getId() != null) ? "Client edit success" : "Client save success";
@@ -122,8 +149,13 @@ public class ClientController {
 	@RequestMapping(value = "/delete/{id}")
 	public String delete(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		if (id > 0) {
+			Client client = clientService.findOne(id);
+
 			clientService.delete(id);
-			flash.addFlashAttribute("success", "Client delete success");
+
+			if (uploadFileService.delete(client.getPic())) {
+				flash.addFlashAttribute("info", "Pic " + client.getPic() + " successfully deleted");
+			}
 		}
 		return "redirect:/client/list";
 	}
