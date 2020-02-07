@@ -33,7 +33,7 @@ import com.datajpa.springboot.web.app.model.service.IUploadFileService;
 import com.datajpa.springboot.web.app.util.paginator.PageRender;
 
 @Controller
-@RequestMapping("/client")
+@RequestMapping({"/client", "/"})
 @SessionAttributes("client")
 public class ClientController {
 
@@ -62,7 +62,7 @@ public class ClientController {
 
 	@GetMapping(value = "/view/{id}")
 	public String view(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
-		Client client = clientService.findOne(id);
+		Client client = clientService.fetchByIdWithBills(id);//clientService.findOne(id);
 		if (client == null) {
 			flash.addFlashAttribute("error", "Client no exist");
 			return "redirect:/client/list";
@@ -72,7 +72,7 @@ public class ClientController {
 		return "view";
 	}
 
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	@RequestMapping(value = {"/list", "/"}, method = RequestMethod.GET)
 	public String list(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
 		Pageable pageRequest = PageRequest.of(page, 4);
 		Page<Client> clients = clientService.findAll(pageRequest);

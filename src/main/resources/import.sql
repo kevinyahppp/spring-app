@@ -35,11 +35,11 @@ INSERT INTO products (name, price, create_at) VALUES('Bianchi Bicicleta Aro 26',
 INSERT INTO products (name, price, create_at) VALUES('Mica Comoda 5 Cajones', 299990, NOW());
 
 /* Creamos algunas bills */
-INSERT INTO bills (description, observation, client_id, create_at) VALUES('bill equipos de oficina', null, 1, NOW());
+INSERT INTO bills (description, observation, client_id, create_at) VALUES('Bill equipos de oficina', null, 1, NOW());
 INSERT INTO bills_items (quantity, bills_items_id, product_id) VALUES(1, 1, 1);
 INSERT INTO bills_items (quantity, bills_items_id, product_id) VALUES(2, 1, 4);
 INSERT INTO bills_items (quantity, bills_items_id, product_id) VALUES(1, 1, 5);
 INSERT INTO bills_items (quantity, bills_items_id, product_id) VALUES(1, 1, 7);
 
-INSERT INTO bills (description, observation, client_id, create_at) VALUES('bill Bicicleta', 'Alguna nota importante!', 1, NOW());
+INSERT INTO bills (description, observation, client_id, create_at) VALUES('Bill Bicicleta', 'Alguna nota importante!', 1, NOW());
 INSERT INTO bills_items (quantity, bills_items_id, product_id) VALUES(3, 2, 6);

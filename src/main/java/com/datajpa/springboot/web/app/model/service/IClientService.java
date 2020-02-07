@@ -19,4 +19,7 @@ public interface IClientService {
 	void saveBill(Bill bill);
 	Product findProductById(Long id);
 	Bill findBillById(Long id);
+	void deleteBill(Long id);
+	Bill fetchByIdWithClientWithItemBillWithProduct(Long id);
+	Client fetchByIdWithBills(Long id);
 }

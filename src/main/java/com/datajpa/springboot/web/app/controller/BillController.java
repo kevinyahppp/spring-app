@@ -37,7 +37,7 @@ public class BillController {
 
 	@GetMapping("/view/{id}")
 	public String view(@PathVariable Long id, Model model, RedirectAttributes flash) {
-		Bill bill = clientService.findBillById(id);
+		Bill bill = clientService.fetchByIdWithClientWithItemBillWithProduct(id);//clientService.findBillById(id);
 		if (bill == null) {
 			flash.addFlashAttribute("error", "Bill invalid");
 			return "redirect:/client/list";
@@ -92,5 +92,18 @@ public class BillController {
 		status.setComplete();
 		flash.addFlashAttribute("success", "Bill successfully created");
 		return "redirect:/client/view/" + bill.getClient().getId();
+	}
+
+	@GetMapping("/delete/{id}")
+	public String delete(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
+		Bill bill = clientService.findBillById(id);
+		if (bill != null) {
+			clientService.deleteBill(id);
+			flash.addFlashAttribute("success", "Bill successfully deleted");
+			return "redirect:/client/view/" + bill.getClient().getId();
+		}
+		flash.addFlashAttribute("error", "Bill not deleted");
+
+		return "redirect:/client/list";
 	}
 }

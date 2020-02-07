@@ -121,4 +121,9 @@ public class Client implements Serializable {
 		return serialVersionUID;
 	}
 
+	@Override
+	public String toString() {
+		return name + " " + lastName;
+	}
+
 }

@@ -89,4 +89,25 @@ public class ClientServiceImpl implements IClientService {
 		// TODO Auto-generated method stub
 		return billDao.findById(id).orElse(null);
 	}
+
+	@Override
+	@Transactional
+	public void deleteBill(Long id) {
+		// TODO Auto-generated method stub
+		billDao.deleteById(id);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Bill fetchByIdWithClientWithItemBillWithProduct(Long id) {
+		// TODO Auto-generated method stub
+		return billDao.fetchByIdWithClientWithItemBillWithProduct(id);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Client fetchByIdWithBills(Long id) {
+		// TODO Auto-generated method stub
+		return clientDao.fetchByIdWithBills(id);
+	}
 }

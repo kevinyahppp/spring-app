@@ -3,6 +3,7 @@ encoding//src/main/java=UTF-8
 encoding//src/main/resources=UTF-8
 encoding//src/main/resources/messages.properties=UTF-8
 encoding//src/main/resources/templates/bill/form.html=UTF-8
+encoding//src/main/resources/templates/bill/view.html=UTF-8
 encoding//src/main/resources/templates/form.html=UTF-8
 encoding//src/main/resources/templates/list.html=UTF-8
 encoding//src/main/resources/templates/paginator-nav.html=UTF-8
